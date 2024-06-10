@@ -42,14 +42,17 @@
         <button @click="nextPage" :disabled="page === totalPages" class="pagination-button">Next</button>
       </div>
     </div>
+    <toast v-if="toastMessage" :message="toastMessage" :type="toastType" @hidden="toastMessage = ''"></toast>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+import Toast from './toast.vue';
 
 export default {
+  components: { Toast },
   setup() {
     const comments = ref([]);
     const searchQuery = ref('');
@@ -60,6 +63,8 @@ export default {
     const loading = ref(true);
     const editId = ref(null);
     const editComment = ref({});
+    const toastMessage = ref('');
+    const toastType = ref('');
 
     const fetchComments = async () => {
       loading.value = true;
@@ -137,12 +142,19 @@ export default {
       const index = comments.value.findIndex(c => c.id === id);
       if (index !== -1) {
         comments.value[index] = { ...editComment.value };
+        showToast('Data Updated Successfully', 'success');
       }
       editId.value = null;
     };
 
     const deleteComment = (id) => {
       comments.value = comments.value.filter(comment => comment.id !== id);
+      showToast('Delete Data Successfully', 'success');
+    };
+
+    const showToast = (message, type) => {
+      toastMessage.value = message;
+      toastType.value = type;
     };
 
     function debounce(func, wait) {
@@ -170,10 +182,13 @@ export default {
       deleteComment,
       editId,
       editComment,
+      toastMessage,
+      toastType,
     };
   },
 };
 </script>
+
 
 <style scoped>
 .datatable-container {
